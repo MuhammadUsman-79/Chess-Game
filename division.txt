@@ -1,0 +1,3 @@
+Ali: handles all pieces classes as well as their inheritance.
+Subhan: handles board class, board rendering, game loop, and player input.
+Usman: handles game conditions, check, checkmate, draw, stalemate.
