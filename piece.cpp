@@ -1,6 +1,5 @@
 #include "Piece.h"
 
-
 //====== Positon Class implementation ======
 
 //Constructor for initiailization of row and column with given values

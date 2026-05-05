@@ -1,3 +1,6 @@
+#ifndef PIECE_H
+#define PIECE_H
+
 #include <iostream>
 using namespace std;
 
@@ -87,3 +90,6 @@ public:
         hasMoved = moved;
     }
 };
+
+
+#endif

@@ -1,4 +1,5 @@
-/*#include "board.h"
+#include "board.h"
+#include "piece.h"
 
 class GameConditions {
 private:
@@ -7,9 +8,8 @@ private:
 public:
     GameConditions(Board* b);
 
-    bool is_in_check(bool white);
-    bool is_checkmate(bool white);
-    bool is_stalemate(bool white);  
-    bool is_draw(bool white);
+    bool is_in_check(Color color); 
+    bool is_checkmate(Color color);
+    bool is_stalemate(Color color);
+    bool is_draw(Color color);
 };
-*/
