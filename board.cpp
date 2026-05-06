@@ -6,6 +6,7 @@
 #include "bishop.h"
 #include "queen.h"
 #include "king.h"
+#include "GameConditions.h"
 #include <iostream>
 #include <cstring>
 using namespace std;
@@ -576,7 +577,8 @@ void Board::startGame() {
             cout << "Black's turn" << endl;
         }
 
-        cout << "Enter move (from to) or command: ";
+        // CHANGED: SPLIT INTO TWO SEPARATE PROMPTS FOR CLARITY
+        cout << "Enter from (or command): ";
         cin >> from;
 
         // Handle commands
@@ -595,16 +597,29 @@ void Board::startGame() {
         if (strcmp(from, "help") == 0) {
             cout << endl;
             cout << "Commands:" << endl;
-            cout << "  e2 e4   - move piece from e2 to e4" << endl;
             cout << "  flip    - flip the board view" << endl;
             cout << "  quit    - exit the game" << endl;
             cout << endl;
             continue;
         }
 
+        // ADDED: SHOW PIECE SYMBOL AND SQUARE IN THE TO PROMPT
+        int tempRow, tempCol;
+        tempRow = tempCol = -1;
+        if (parseInput(from, tempRow, tempCol)) {
+            Piece* selectedPiece = squares[tempRow][tempCol];
+            if (selectedPiece != NULL) {
+                cout << "Enter to (" << selectedPiece->getSymbol() << from << "): ";
+            } else {
+                cout << "Enter to: ";
+            }
+        } else {
+            cout << "Enter to: ";
+        }
+
         // Read destination
         cin >> to;
-
+        
         // Parse from and to squares
         int fromRow, fromCol, toRow, toCol;
         fromRow = fromCol = toRow = toCol = -1;
@@ -626,6 +641,34 @@ void Board::startGame() {
             switchTurn();
             // Note: Usman's code will check for check/checkmate/stalemate
             // after each successful move and set gameOver accordingly
+
+            // ADDED: USMAN'S GAME CONDITIONS CHECK AFTER EVERY MOVE
+            GameConditions gc(this);
+            bool currentWhite = isWhiteTurn();
+
+            if (gc.is_checkmate(currentWhite ? WHITE : BLACK)) {
+                displayBoard();
+                if (currentWhite) {
+                    cout << "Black wins by checkmate!" << endl;
+                } else {
+                    cout << "White wins by checkmate!" << endl;
+                }
+                gameOver = true;
+            } else if (gc.is_stalemate(currentWhite ? WHITE : BLACK)) {
+                displayBoard();
+                cout << "Stalemate! Game is a draw." << endl;
+                gameOver = true;
+            } else if (gc.is_draw(currentWhite ? WHITE : BLACK)) {
+                displayBoard();
+                cout << "Draw by insufficient material." << endl;
+                gameOver = true;
+            } else if (gc.is_in_check(currentWhite ? WHITE : BLACK)) {
+                if (currentWhite) {
+                    cout << "White king is in check!" << endl;
+                } else {
+                    cout << "Black king is in check!" << endl;
+                }
+            }
         }
     }
 }

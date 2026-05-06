@@ -99,15 +99,19 @@ public:
 
     //Checks if moving from one square to another is inside the valid moves list
     bool isValidMove(int fromRow, int fromCol, int toRow, int toCol, Board* board) {
-        Position moves[28];
-        int moveCount = 0;
-        getValidMoves(*board, moves, moveCount);
-        for (int i = 0; i < moveCount; i++) {
-            if (moves[i].row == toRow && moves[i].col == toCol) {
-                return true;
-            }
+    // ADDED: TEMPORARILY SET POSITION TO fromRow,fromCol BEFORE GENERATING MOVES
+    Position savedPos = currentPos;
+    currentPos = Position(fromRow, fromCol);
+    Position moves[28];
+    int moveCount = 0;
+    getValidMoves(*board, moves, moveCount);
+    currentPos = savedPos; // ADDED: RESTORE ORIGINAL POSITION AFTER GENERATING MOVES
+    for (int i = 0; i < moveCount; i++) {
+        if (moves[i].row == toRow && moves[i].col == toCol) {
+            return true;
         }
-        return false;
+    }
+    return false;
     }
 
     // ADDED: canAttack() NEEDED BY board.cpp isSquareUnderAttack
