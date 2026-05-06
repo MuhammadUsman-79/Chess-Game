@@ -34,40 +34,46 @@ Pawn::Pawn(const Pawn &other) : Piece(other) {
 
 //getValidMoves()
 //Generates possible moves for pawn without validation
-void Pawn::getValidMoves(Board &board, Position moves[], int &moveCount) {
-
+void Pawn::getValidMoves(Board& board, Position moves[], int& moveCount) {
     moveCount = 0;
+    
+    int row = getPosition().row;
+    int col = getPosition().col;
+    
+    int direction = (getColor() == WHITE) ? -1 : 1;  // White moves up (-1), Black moves down (+1)
 
-    // Determines movement direction based on color
-    // White moves upward (-1 row)
-    //Black moves downward (+1 row)
-    int direction;
-    if (pieceColor == WHITE) {
-        direction = -1;
-    } else {
-        direction = 1;
+    // === ONE STEP FORWARD ===
+    int oneStep = row + direction;
+    if (oneStep >= 0 && oneStep < BOARD_SIZE) {
+        if (board.getPiece(oneStep, col) == nullptr) {   // Square must be EMPTY
+            moves[moveCount++] = Position(oneStep, col);
+        }
     }
 
-    int r = currentPos.row; //row
-    int c = currentPos.col; //col
-
-    //Forward move (1 step)
-    Position forward(r + direction, c);
-    moves[moveCount++] = forward;
-
-    //Forward move (2 steps ONLY if pawn has NOT moved yet)
-    if (!hasMoved) {
-        Position doubleForward(r + 2*direction, c);
-        moves[moveCount++] = doubleForward;
+    // === TWO STEPS FORWARD (only from starting position) ===
+    if ((getColor() == WHITE && row == 6) || (getColor() == BLACK && row == 1)) {
+        int twoStep = row + (2 * direction);
+        if (twoStep >= 0 && twoStep < BOARD_SIZE) {
+            if (board.getPiece(oneStep, col) == nullptr && 
+                board.getPiece(twoStep, col) == nullptr) {
+                moves[moveCount++] = Position(twoStep, col);
+            }
+        }
     }
 
-    //Diagonal capture moves (left and right)
-    //Board will later check if enemy piece exists there
-    Position leftCapture(r + direction, c-1); //col-1
-    Position rightCapture(r + direction, c+1); //col+1
+    // === DIAGONAL CAPTURES ===
+    int captureCols[2] = {col - 1, col + 1};
+    for (int i = 0; i < 2; i++) {
+        int c = captureCols[i];
+        if (c >= 0 && c < BOARD_SIZE) {
+            Piece* target = board.getPiece(oneStep, c);
+            if (target != nullptr && target->getColor() != getColor()) {
+                moves[moveCount++] = Position(oneStep, c);
+            }
+        }
+    }
 
-    moves[moveCount++] = leftCapture;
-    moves[moveCount++] = rightCapture;
+    // Optional: En passant can be added later
 }
 
 //getSymbol()

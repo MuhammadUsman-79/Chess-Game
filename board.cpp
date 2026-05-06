@@ -634,35 +634,34 @@ void Board::startGame() {
             continue;
         }
 
-        // Attempt the move
+                // Attempt the move
         bool moved = movePiece(fromRow, fromCol, toRow, toCol);
 
-        if (moved) {
+                 if (moved) {
             switchTurn();
-            // Note: Usman's code will check for check/checkmate/stalemate
-            // after each successful move and set gameOver accordingly
 
-            // ADDED: USMAN'S GAME CONDITIONS CHECK AFTER EVERY MOVE
+            // Check game status after switching turn to the next player
             GameConditions gc(this);
             bool currentWhite = isWhiteTurn();
+            Color activeColor = currentWhite ? WHITE : BLACK;
 
-            if (gc.is_checkmate(currentWhite ? WHITE : BLACK)) {
+            if (gc.is_checkmate(activeColor)) {
                 displayBoard();
                 if (currentWhite) {
-                    cout << "Black wins by checkmate!" << endl;
+                    cout << "CHECKMATE! Black wins!" << endl;
                 } else {
-                    cout << "White wins by checkmate!" << endl;
+                    cout << "CHECKMATE! White wins!" << endl;
                 }
                 gameOver = true;
-            } else if (gc.is_stalemate(currentWhite ? WHITE : BLACK)) {
+            } else if (gc.is_stalemate(activeColor)) {
                 displayBoard();
-                cout << "Stalemate! Game is a draw." << endl;
+                cout << "DRAW BY STALEMATE!" << endl;
                 gameOver = true;
-            } else if (gc.is_draw(currentWhite ? WHITE : BLACK)) {
+            } else if (gc.is_draw(activeColor)) {
                 displayBoard();
-                cout << "Draw by insufficient material." << endl;
+                cout << "DRAW BY INSUFFICIENT MATERIAL!" << endl;
                 gameOver = true;
-            } else if (gc.is_in_check(currentWhite ? WHITE : BLACK)) {
+            } else if (gc.is_in_check(activeColor)) {
                 if (currentWhite) {
                     cout << "White king is in check!" << endl;
                 } else {

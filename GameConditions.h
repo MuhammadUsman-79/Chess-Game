@@ -15,6 +15,8 @@ public:
     bool is_checkmate(Color color);
     bool is_stalemate(Color color);
     bool is_draw(Color color);
+
+    Color getOpponentColor(Color color);
 };
 
 #endif
