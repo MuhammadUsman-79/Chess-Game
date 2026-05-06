@@ -1,84 +1,46 @@
-#include "pawn.h"
+#ifndef PAWN_H
+#define PAWN_H
+#include "piece.h"
 
-// Default Constructor
-//Initializes pawn using base class default values
-Pawn::Pawn() : Piece() {
-    /*BASE CLASS already sets:
-    color = WHITE
-    position = (0,0)
-    hasMoved = false
+/* Pawn class inherits from Piece
+This means Pawn automatically gets:
+color
+position
+hasMoved flag
+Polymorphism is used because Pawn overrides movement rules
+Every piece has different movement behavior
+*/
+class Pawn : public Piece {
+public:
+
+    /*Default Constructor
+    Used when pawn is created without initial values
+    Example: temporary object creation*/
+    Pawn();
+
+    // ADDED: bool CONSTRUCTOR NEEDED BY board.cpp initializeBoard
+    Pawn(bool isWhite);
+
+    /*Parameterized Constructor
+    Used when placing pawn on board at start of game
     */
-    pieceType = PAWN;
-}
+    Pawn(Color color, Position pos);
 
+    /*Copy Constructor (Shallow Copy since no dynamic memory)
+    Copies values from another pawn object*/
+    Pawn(const Pawn &other);
 
-/* Parameterized Constructor
-Used when placing pawn on board during initialization*/
-Pawn::Pawn(Color color, Position pos) : Piece(color, pos) {
-    //Sends values to Piece class to set them
-    pieceType = PAWN;
-}
+    /*Generates possible pawn moves (not fully validated, Only generates moves, Board class handles validation)
+    board: checks current game state (empty squares, enemies, blocks)
+    moves[]: stores possible moves
+    moveCount: number of moves found
+    board passed by reference to avoid copying
+    */
+    void getValidMoves(Board &board, Position moves[], int &moveCount) override;
 
+    //Symbol Function for Console Representation
+    //Returns character used to display pawn on the board
+    char getSymbol() override;
+};
 
-//Copy Constructor (Shallow Copy)
-//Copies all values from another pawn object
-Pawn::Pawn(const Pawn &other) : Piece(other) {
-    //Base class handles copying:
-    //pieceColor, currentPos, hasMoved
-    pieceType = PAWN;
-}
-
-
-//getValidMoves()
-//Generates possible moves for pawn without validation
-void Pawn::getValidMoves(Board &board, Position moves[], int &moveCount) {
-
-    moveCount = 0;
-
-    // Determines movement direction based on color
-    // White moves upward (-1 row)
-    //Black moves downward (+1 row)
-    int direction;
-    if (pieceColor == WHITE) {
-        direction = -1;
-    }
-    else {
-        direction = 1;
-    }
-
-    int r = currentPos.row; //row
-    int c = currentPos.col; //col
-
-    //Forward move (1 step)
-    Position forward(r + direction, c);
-    moves[moveCount++] = forward;
-
-
-    //Forward move (2 steps ONLY if pawn has NOT moved yet)
-    if (!hasMoved) {
-        Position doubleForward(r + 2*direction, c);
-        moves[moveCount++] = doubleForward;
-    }
-
-    //Diagonal capture moves (left and right)
-    //Board will later check if enemy piece exists there
-    Position leftCapture(r +direction, c-1); //col-1
-    Position rightCapture(r+ direction, c+1); //col+1
-
-    moves[moveCount++] = leftCapture;
-    moves[moveCount++] = rightCapture;
-}
-
-//getSymbol()
-//Returns character used for console representation
-char Pawn::getSymbol() {
-
-    // Uppercase = White piece
-    // Lowercase = Black piece
-    if (pieceColor == WHITE) {
-        return 'P';
-    }
-    else {
-        return 'p';
-    }
-}
+#endif

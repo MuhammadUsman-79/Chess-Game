@@ -1,5 +1,5 @@
 #include "king.h"
-
+#include "board.h"
 //Default Constructor
 //Initializes king using base class default values
 King::King() : Piece() {

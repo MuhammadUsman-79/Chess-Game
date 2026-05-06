@@ -1,4 +1,5 @@
 #include "rook.h"
+#include "board.h"
 
 // Default Constructor
 //Initializes rook using base class default values

@@ -1,4 +1,5 @@
 #include "pawn.h"
+#include "board.h"
 
 // Default Constructor
 //Initializes pawn using base class default values
@@ -11,6 +12,10 @@ Pawn::Pawn() : Piece() {
     pieceType = PAWN;
 }
 
+// ADDED: bool CONSTRUCTOR, CONVERTS bool TO Color ENUM FOR BASE CLASS
+Pawn::Pawn(bool isWhite) : Piece(isWhite ? WHITE : BLACK, Position(0,0)) {
+    pieceType = PAWN;
+}
 
 /* Parameterized Constructor
 Used when placing pawn on board during initialization*/
@@ -19,7 +24,6 @@ Pawn::Pawn(Color color, Position pos) : Piece(color, pos) {
     pieceType = PAWN;
 }
 
-
 //Copy Constructor (Shallow Copy)
 //Copies all values from another pawn object
 Pawn::Pawn(const Pawn &other) : Piece(other) {
@@ -27,7 +31,6 @@ Pawn::Pawn(const Pawn &other) : Piece(other) {
     //pieceColor, currentPos, hasMoved
     pieceType = PAWN;
 }
-
 
 //getValidMoves()
 //Generates possible moves for pawn without validation
@@ -41,8 +44,7 @@ void Pawn::getValidMoves(Board &board, Position moves[], int &moveCount) {
     int direction;
     if (pieceColor == WHITE) {
         direction = -1;
-    }
-    else {
+    } else {
         direction = 1;
     }
 
@@ -53,7 +55,6 @@ void Pawn::getValidMoves(Board &board, Position moves[], int &moveCount) {
     Position forward(r + direction, c);
     moves[moveCount++] = forward;
 
-
     //Forward move (2 steps ONLY if pawn has NOT moved yet)
     if (!hasMoved) {
         Position doubleForward(r + 2*direction, c);
@@ -62,8 +63,8 @@ void Pawn::getValidMoves(Board &board, Position moves[], int &moveCount) {
 
     //Diagonal capture moves (left and right)
     //Board will later check if enemy piece exists there
-    Position leftCapture(r +direction, c-1); //col-1
-    Position rightCapture(r+ direction, c+1); //col+1
+    Position leftCapture(r + direction, c-1); //col-1
+    Position rightCapture(r + direction, c+1); //col+1
 
     moves[moveCount++] = leftCapture;
     moves[moveCount++] = rightCapture;
@@ -77,8 +78,7 @@ char Pawn::getSymbol() {
     // Lowercase = Black piece
     if (pieceColor == WHITE) {
         return 'P';
-    }
-    else {
+    } else {
         return 'p';
     }
 }

@@ -1,5 +1,6 @@
-#include "GameConditions.h"
 #include <iostream>
+#include "GameConditions.h"
+#include "board.h"
 using namespace std;
 
 GameConditions::GameConditions(Board* b) {

@@ -1,4 +1,5 @@
 #include "queen.h"
+#include "board.h"
 
 // Default Constructor
 //Initializes queen using base class default values

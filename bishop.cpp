@@ -1,4 +1,5 @@
-#include "Bishop.h"
+#include "bishop.h"
+#include "board.h" 
 
 // Default Constructor
 //Initializes bishop using base class default values
@@ -11,6 +12,10 @@ Bishop::Bishop() : Piece() {
     pieceType = BISHOP;
 }
 
+// ADDED: bool CONSTRUCTOR, CONVERTS bool TO Color ENUM FOR BASE CLASS
+Bishop::Bishop(bool isWhite) : Piece(isWhite ? WHITE : BLACK, Position(0,0)) {
+    pieceType = BISHOP;
+}
 
 /* Parameterized Constructor
 Used when placing bishop on board during initialization*/
@@ -18,7 +23,6 @@ Bishop::Bishop(Color color, Position pos) : Piece(color, pos) {
     //Sends values to Piece class to set them
     pieceType = BISHOP;
 }
-
 
 //Copy Constructor (Shallow Copy)
 //Copies all values from another bishop object
@@ -28,14 +32,11 @@ Bishop::Bishop(const Bishop &other) : Piece(other) {
     pieceType = BISHOP;
 }
 
-
 //getValidMoves()
 //Generates all diagonal moves for the bishop
 //Slides along each diagonal until blocked or out of bounds
 void Bishop::getValidMoves(Board &board, Position moves[], int &moveCount) {
-
     moveCount = 0;
-
     int r = currentPos.row;
     int c = currentPos.col;
 
@@ -45,7 +46,6 @@ void Bishop::getValidMoves(Board &board, Position moves[], int &moveCount) {
 
     //Slide along each diagonal direction
     for (int d=0; d<4; d++) {
-
         int newRow = r + rowDir[d];
         int newCol = c + colDir[d];
 
@@ -54,13 +54,11 @@ void Bishop::getValidMoves(Board &board, Position moves[], int &moveCount) {
 
             Piece* dest = board.getPiece(newRow, newCol);
 
-            if (dest != nullptr){
-
+            if (dest != nullptr) {
                 //Friendly piece blocks the path, CANNOT move here
                 if (dest->getColor() == pieceColor) {
                     break; //Stop moving in this direction
                 }
-
                 //Enemy piece: can capture it, then must stop
                 moves[moveCount++] = Position(newRow, newCol);
                 break; //Cannot slide further after capture
@@ -68,7 +66,6 @@ void Bishop::getValidMoves(Board &board, Position moves[], int &moveCount) {
 
             //Empty square: add and continue moving
             moves[moveCount++] = Position(newRow, newCol);
-
             newRow += rowDir[d];
             newCol += colDir[d];
         }
@@ -77,13 +74,11 @@ void Bishop::getValidMoves(Board &board, Position moves[], int &moveCount) {
 
 //Returns character on board
 char Bishop::getSymbol() {
-
     // Uppercase = White piece
     // Lowercase = Black piece
-    if (pieceColor == WHITE){
+    if (pieceColor == WHITE) {
         return 'B';
-    }
-    else {
+    } else {
         return 'b';
     }
 }

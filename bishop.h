@@ -1,16 +1,17 @@
+#ifndef BISHOP_H
+#define BISHOP_H
 #include "piece.h"
+// REMOVED: #include "board.h" CAUSES CIRCULAR INCLUDE, Board IS FORWARD DECLARED IN piece.h
 
 /* Bishop class inherits from Piece
-    This means Bishop automatically gets:
-      color
-      position
-      hasMoved flag
-
-    Polymorphism is used because Bishop overrides movement rules
-    Bishop moves diagonally any number of squares
-    It is blocked by any piece in its path
+This means Bishop automatically gets:
+color
+position
+hasMoved flag
+Polymorphism is used because Bishop overrides movement rules
+Bishop moves diagonally any number of squares
+It is blocked by any piece in its path
 */
-
 class Bishop : public Piece {
 
 public:
@@ -20,17 +21,17 @@ public:
     Example: temporary object creation*/
     Bishop();
 
+    // ADDED: bool CONSTRUCTOR NEEDED BY board.cpp initializeBoard AND handlePromotion
+    Bishop(bool isWhite);
 
     /*Parameterized Constructor
     Used when placing bishop on board at start of game
     */
     Bishop(Color color, Position pos);
 
-
     /*Copy Constructor (Shallow Copy since no dynamic memory)
     Copies values from another bishop object*/
     Bishop(const Bishop &other);
-
 
     /*Generates all diagonal moves for the bishop
     Stops when hitting board edge, friendly piece, or after capturing enemy
@@ -46,3 +47,5 @@ public:
     //Returns character used to display bishop
     char getSymbol() override;
 };
+
+#endif

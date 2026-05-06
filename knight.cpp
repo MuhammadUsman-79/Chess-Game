@@ -1,4 +1,5 @@
-#include "Knight.h"
+#include "knight.h"
+#include "board.h"
 
 //Default Constructor
 Knight::Knight() : Piece() {

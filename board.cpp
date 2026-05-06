@@ -1,5 +1,5 @@
+#include "piece.h"   // MUST BE FIRST, DEFINES Color, BLACK, WHITE
 #include "board.h"
-#include "piece.h"
 #include "pawn.h"
 #include "rook.h"
 #include "knight.h"
@@ -50,18 +50,18 @@ void Board::initializeBoard() {
     clearBoard();
 
     // Place black pieces on row 0
-    squares[0][0] = new Rook(false);
-    squares[0][1] = new Knight(false);
-    squares[0][2] = new Bishop(false);
-    squares[0][3] = new Queen(false);
-    squares[0][4] = new King(false);
-    squares[0][5] = new Bishop(false);
-    squares[0][6] = new Knight(false);
-    squares[0][7] = new Rook(false);
+    squares[0][0] = new Rook(BLACK, Position(0,0));
+    squares[0][1] = new Knight(BLACK, Position(0,1));
+    squares[0][2] = new Bishop(BLACK, Position(0,2));
+    squares[0][3] = new Queen(BLACK, Position(0,3));
+    squares[0][4] = new King(BLACK, Position(0,4));
+    squares[0][5] = new Bishop(BLACK, Position(0,5));
+    squares[0][6] = new Knight(BLACK, Position(0,6));
+    squares[0][7] = new Rook(BLACK, Position(0,7));
 
     // Black pawns on row 1
     for (int j = 0; j < BOARD_SIZE; j++) {
-        squares[1][j] = new Pawn(false);
+        squares[1][j] = new Pawn(BLACK, Position(1,j)); // CHANGED: false TO BLACK
     }
 
     // Empty squares in the middle
@@ -73,18 +73,18 @@ void Board::initializeBoard() {
 
     // White pawns on row 6
     for (int j = 0; j < BOARD_SIZE; j++) {
-        squares[6][j] = new Pawn(true);
+        squares[6][j] = new Pawn(WHITE, Position(6,j)); // CHANGED: true TO WHITE
     }
 
     // Place white pieces on row 7
-    squares[7][0] = new Rook(true);
-    squares[7][1] = new Knight(true);
-    squares[7][2] = new Bishop(true);
-    squares[7][3] = new Queen(true);
-    squares[7][4] = new King(true);
-    squares[7][5] = new Bishop(true);
-    squares[7][6] = new Knight(true);
-    squares[7][7] = new Rook(true);
+    squares[7][0] = new Rook(WHITE, Position(7,0));   // CHANGED: true TO WHITE
+    squares[7][1] = new Knight(WHITE, Position(7,1)); // CHANGED: true TO WHITE
+    squares[7][2] = new Bishop(WHITE, Position(7,2)); // CHANGED: true TO WHITE
+    squares[7][3] = new Queen(WHITE, Position(7,3));  // CHANGED: true TO WHITE
+    squares[7][4] = new King(WHITE, Position(7,4));   // CHANGED: true TO WHITE
+    squares[7][5] = new Bishop(WHITE, Position(7,5)); // CHANGED: true TO WHITE
+    squares[7][6] = new Knight(WHITE, Position(7,6)); // CHANGED: true TO WHITE
+    squares[7][7] = new Rook(WHITE, Position(7,7));   // CHANGED: true TO WHITE
 
     whiteTurn = true;
     enPassantCol = -1;
@@ -475,25 +475,32 @@ void Board::handlePromotion(int row, int col) {
     delete squares[row][col];
     squares[row][col] = NULL;
 
+    // CHANGED: bool TO Color ENUM TO MATCH ALI'S CONSTRUCTORS
+    Color promotionColor;
+    if (isWhitePiece) {
+        promotionColor = WHITE;
+    } else {
+        promotionColor = BLACK;
+    }
+
     if (choice == 1) {
-        squares[row][col] = new Queen(isWhitePiece);
+        squares[row][col] = new Queen(promotionColor, Position(row, col)); // CHANGED: bool TO Color
     } else if (choice == 2) {
-        squares[row][col] = new Rook(isWhitePiece);
+        squares[row][col] = new Rook(promotionColor, Position(row, col));  // CHANGED: bool TO Color
     } else if (choice == 3) {
-        squares[row][col] = new Bishop(isWhitePiece);
+        squares[row][col] = new Bishop(promotionColor, Position(row, col)); // CHANGED: bool TO Color
     } else if (choice == 4) {
-        squares[row][col] = new Knight(isWhitePiece);
+        squares[row][col] = new Knight(promotionColor, Position(row, col)); // CHANGED: bool TO Color
     } else {
         // Default to queen if invalid input
         cout << "Invalid choice. Defaulting to Queen." << endl;
-        squares[row][col] = new Queen(isWhitePiece);
+        squares[row][col] = new Queen(promotionColor, Position(row, col)); // CHANGED: bool TO Color
     }
 
     cout << "Promoted to ";
     cout << squares[row][col]->getSymbol();
     cout << "!" << endl;
 }
-
 // -------------------------------------------------------
 // Input Parsing
 // -------------------------------------------------------

@@ -1,13 +1,13 @@
+#ifndef PIECE_H  // CHANGED: BOARD_H TO PIECE_H
+#define PIECE_H
 #include <iostream>
 using namespace std;
 
-//Enum for color of the Piece
 enum Color {
     WHITE, //0
     BLACK //1
 };
 
-//Enum for type of the Piece
 enum PieceType {
     KING, //0
     QUEEN, //1
@@ -17,64 +17,50 @@ enum PieceType {
     PAWN //5
 };
 
-//Represents a position on the board
-//Row and column values are from 0 to 7
 struct Position {
     int row;
     int col;
-
+    
     //Constructor (both default and parameterized)
-    Position(int r =0, int c =0) {}
-
+    Position(int r = 0, int c = 0) {
+        row = r; // ADDED: ACTUALLY SET THE VALUES
+        col = c; // ADDED: ACTUALLY SET THE VALUES
+    }
+    
     //Copy Constructor (Shallow copy)
-    Position(const Position &other) {} //Copies values of row and col
-
+    Position(const Position &other) {
+        row = other.row; // ADDED: ACTUALLY COPY THE VALUES
+        col = other.col; // ADDED: ACTUALLY COPY THE VALUES
+    }
 };
 
-
-//Forward declaration
-//Used because Piece needs Board but Board includes Piece
 class Board;
 
-
 //=============== ABSTRACT BASE CLASS ===============
-//Cannot be instantiated //Cannot directly create objects directly
-//This class will be inherited by ALL chess pieces
-class Piece{
+class Piece {
 protected:
-    Color pieceColor;    //stores color of the piece (white or black)
-    PieceType pieceType; //stores the type of the piece (king, queen, etc.)
-    Position currentPos; //current location on the board
-    bool hasMoved; //used for pawn first move and then castling later
+    Color pieceColor;
+    PieceType pieceType;
+    Position currentPos;
+    bool hasMoved;
 
 public:
 
     //Default Constructor
-    //Useful when object is created without parameters
-    Piece() {}
+    Piece(); // CHANGED: REMOVED EMPTY BODY, DEFINITION IS IN piece.cpp
 
-    //Parameterized Constructor (when creating a piece with Specific values)
-    Piece(Color color, Position pos) {}
+    //Parameterized Constructor
+    Piece(Color color, Position pos); // CHANGED: REMOVED EMPTY BODY, DEFINITION IS IN piece.cpp
 
-    //Copy Constructor (Shallow Copy)
-    //Copies values directly (safe here because no dynamic memory inside Piece)
-    Piece(const Piece &other) {}
-
+    //Copy Constructor
+    Piece(const Piece &other); // CHANGED: REMOVED EMPTY BODY, DEFINITION IS IN piece.cpp
 
     //Virtual destructor
-    virtual ~Piece() {} //Both Piece and derived class's destructor runs
+    virtual ~Piece() {}
 
-
-    //PURE VIRTUAL FUNCTION (Polymorphism)
-    //As each derived class MUST implement ITS OWN movement logic
-    // moves[] is array to store the possible moves
-    //moveCount is the number of valid moves found
+    //PURE VIRTUAL FUNCTIONS
     virtual void getValidMoves(Board &board, Position moves[], int &moveCount) = 0;
-
-
-    //Returns the symbol used in printing board for console display
-    virtual char getSymbol() = 0; //(Polymorphism as each piece has its own symbol/character)
-
+    virtual char getSymbol() = 0;
 
     //GETTER FUNCTIONS
     Color getColor() {
@@ -106,8 +92,12 @@ public:
         hasMoved = moved;
     }
 
+    // ADDED: setMoved() NEEDED BY board.cpp WHEN UNDOING MOVES
+    void setMoved(bool moved) {
+        hasMoved = moved;
+    }
+
     //Checks if moving from one square to another is inside the valid moves list
-    //Returns true if the move is valid, false otherwise
     bool isValidMove(int fromRow, int fromCol, int toRow, int toCol, Board* board) {
         Position moves[28];
         int moveCount = 0;
@@ -119,4 +109,22 @@ public:
         }
         return false;
     }
+
+    // ADDED: canAttack() NEEDED BY board.cpp isSquareUnderAttack
+    bool canAttack(int fromRow, int fromCol, int toRow, int toCol, Board* board) {
+        Position savedPos = currentPos;
+        currentPos = Position(fromRow, fromCol);
+        Position moves[28];
+        int moveCount = 0;
+        getValidMoves(*board, moves, moveCount);
+        currentPos = savedPos;
+        for (int i = 0; i < moveCount; i++) {
+            if (moves[i].row == toRow && moves[i].col == toCol) {
+                return true;
+            }
+        }
+        return false;
+    }
 };
+
+#endif
