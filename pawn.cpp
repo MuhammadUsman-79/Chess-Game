@@ -8,6 +8,7 @@ Pawn::Pawn() : Piece() {
     position = (0,0)
     hasMoved = false
     */
+    pieceType = PAWN;
 }
 
 
@@ -15,6 +16,7 @@ Pawn::Pawn() : Piece() {
 Used when placing pawn on board during initialization*/
 Pawn::Pawn(Color color, Position pos) : Piece(color, pos) {
     //Sends values to Piece class to set them
+    pieceType = PAWN;
 }
 
 
@@ -23,6 +25,7 @@ Pawn::Pawn(Color color, Position pos) : Piece(color, pos) {
 Pawn::Pawn(const Pawn &other) : Piece(other) {
     //Base class handles copying:
     //pieceColor, currentPos, hasMoved
+    pieceType = PAWN;
 }
 
 
