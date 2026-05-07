@@ -50,19 +50,16 @@ bool GameConditions::is_checkmate(Color color) {
                 // get every square this piece can move to
                 Position moves[28];
                 int moveCount = 0;
-                // ADDED: SET PIECE POSITION BEFORE GENERATING MOVES SO getValidMoves USES CORRECT SQUARE
                 Position savedPos = p->getPosition();
                 p->setPosition(Position(r, c));
                 p->getValidMoves(*board, moves, moveCount);
-                p->setPosition(savedPos); // ADDED: RESTORE POSITION AFTER GENERATING MOVES
-
+                p->setPosition(savedPos); 
                             for (int i = 0; i < moveCount; i++) {
                 int tr = moves[i].row; 
                 int tc = moves[i].col;
 
                 Piece* temp = board->getPiece(tr, tc);
 
-                // === NEW: SPECIAL MOVE DETECTION (CASTLING & EN PASSANT) ===
                 bool isCastling = false;
                 bool isEnPassant = false;
                 Piece* capturedEnPassant = nullptr;
@@ -118,8 +115,7 @@ bool GameConditions::is_checkmate(Color color) {
                     board->setPiece(tr - direction, tc, capturedEnPassant);
                 }
 
-                p->setPosition(Position(r, c)); // ADDED: RESTORE PIECE POSITION AFTER SIMULATION
-
+                p->setPosition(Position(r, c)); 
                 if (!still_in_check) {
                     return false;
                     // at least one legal move exists, not checkmate
@@ -134,7 +130,6 @@ bool GameConditions::is_checkmate(Color color) {
     // every possible move still left the king in check
 }
 
-// SAME LOGIC AS CHECKMATE BUT PLAYER IS NOT IN CHECK
 bool GameConditions::is_stalemate(Color color) {
     if (is_in_check(color)) {
         return false;
@@ -148,7 +143,6 @@ bool GameConditions::is_stalemate(Color color) {
 
             Position moves[28];
             int moveCount = 0;
-            // ADDED: SET PIECE POSITION BEFORE GENERATING MOVES SO getValidMoves USES CORRECT SQUARE
             Position savedPos = p->getPosition();
             p->setPosition(Position(r, c));
             p->getValidMoves(*board, moves, moveCount);
@@ -160,7 +154,6 @@ bool GameConditions::is_stalemate(Color color) {
 
                 Piece* temp = board->getPiece(tr, tc);
 
-                // === NEW: SPECIAL MOVE DETECTION (CASTLING & EN PASSANT) ===
                 bool isCastling = false;
                 bool isEnPassant = false;
                 Piece* capturedEnPassant = nullptr;
@@ -197,7 +190,6 @@ bool GameConditions::is_stalemate(Color color) {
                 }
 
                 p->setPosition(Position(tr, tc)); // ADDED: UPDATE PIECE POSITION DURING SIMULATION
-
                 bool still_in_check = is_in_check(color);
 
                 // === UNDO THE MOVE ===
@@ -216,8 +208,7 @@ bool GameConditions::is_stalemate(Color color) {
                     board->setPiece(tr - direction, tc, capturedEnPassant);
                 }
 
-                p->setPosition(Position(r, c)); // ADDED: RESTORE PIECE POSITION AFTER SIMULATION
-
+                p->setPosition(Position(r, c));
                 if (!still_in_check) {
                     return false;  // at least one legal move exists, not stalemate
                 }
@@ -277,7 +268,7 @@ bool GameConditions::is_draw(Color color) {
     return false;
 }
 
-// Helper function (add this if you don't have it already)
+// Helper function
 Color GameConditions::getOpponentColor(Color color) {
     return (color == WHITE) ? BLACK : WHITE;
 }

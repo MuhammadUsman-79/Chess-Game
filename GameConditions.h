@@ -2,7 +2,7 @@
 #define GAMECONDITIONS_H
 
 #include "piece.h"
-#include "board.h" // ADDED: NEEDED FOR board->getPiece, BOARD_SIZE, findKing
+#include "board.h" 
 
 class GameConditions {
 private:

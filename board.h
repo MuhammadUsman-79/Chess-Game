@@ -35,7 +35,7 @@ public:
     bool isWhiteTurn();
     void switchTurn();
 
-    // for game condition checks (Usman will use these)
+    // for game condition checks 
     bool isSquareUnderAttack(int row, int col, bool byWhite);
     Piece* findKing(bool white);
 

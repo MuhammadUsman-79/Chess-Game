@@ -35,8 +35,6 @@ class King : public Piece {
    
    
    /*Generates all one square moves for the king in 8 directions
-   Does not check for check (Board class handles that)
-   
    board: checks current game state (friendly pieces on destination)
    moves[]: stores possible moves
    moveCount: number of moves found

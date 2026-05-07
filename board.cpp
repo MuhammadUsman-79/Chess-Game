@@ -1,4 +1,4 @@
-#include "piece.h"   // MUST BE FIRST, DEFINES Color, BLACK, WHITE
+#include "piece.h"   
 #include "board.h"
 #include "pawn.h"
 #include "rook.h"
@@ -78,14 +78,14 @@ void Board::initializeBoard() {
     }
 
     // Place white pieces on row 7
-    squares[7][0] = new Rook(WHITE, Position(7,0));   // CHANGED: true TO WHITE
-    squares[7][1] = new Knight(WHITE, Position(7,1)); // CHANGED: true TO WHITE
-    squares[7][2] = new Bishop(WHITE, Position(7,2)); // CHANGED: true TO WHITE
-    squares[7][3] = new Queen(WHITE, Position(7,3));  // CHANGED: true TO WHITE
-    squares[7][4] = new King(WHITE, Position(7,4));   // CHANGED: true TO WHITE
-    squares[7][5] = new Bishop(WHITE, Position(7,5)); // CHANGED: true TO WHITE
-    squares[7][6] = new Knight(WHITE, Position(7,6)); // CHANGED: true TO WHITE
-    squares[7][7] = new Rook(WHITE, Position(7,7));   // CHANGED: true TO WHITE
+    squares[7][0] = new Rook(WHITE, Position(7,0));  
+    squares[7][1] = new Knight(WHITE, Position(7,1)); 
+    squares[7][2] = new Bishop(WHITE, Position(7,2)); 
+    squares[7][3] = new Queen(WHITE, Position(7,3));  
+    squares[7][4] = new King(WHITE, Position(7,4));   
+    squares[7][5] = new Bishop(WHITE, Position(7,5)); 
+    squares[7][6] = new Knight(WHITE, Position(7,6)); 
+    squares[7][7] = new Rook(WHITE, Position(7,7));   
 
     whiteTurn = true;
     enPassantCol = -1;
@@ -329,7 +329,6 @@ bool Board::movePiece(int fromRow, int fromCol, int toRow, int toCol) {
         return false;
     }
 
-    // Ask Ali's piece if this move is valid
     if (!piece->isValidMove(fromRow, fromCol, toRow, toCol, this)) {
         cout << "Invalid move for this piece." << endl;
         return false;
@@ -385,8 +384,6 @@ bool Board::movePiece(int fromRow, int fromCol, int toRow, int toCol) {
     squares[fromRow][fromCol] = NULL;
     piece->setMoved(true);
 
-    // --- Check if our own king is in check after this move ---
-    // We use Usman's interface here
     // Find king position
     int kingRow = -1, kingCol = -1;
     for (int i = 0; i < BOARD_SIZE; i++) {
@@ -476,7 +473,6 @@ void Board::handlePromotion(int row, int col) {
     delete squares[row][col];
     squares[row][col] = NULL;
 
-    // CHANGED: bool TO Color ENUM TO MATCH ALI'S CONSTRUCTORS
     Color promotionColor;
     if (isWhitePiece) {
         promotionColor = WHITE;
@@ -485,17 +481,17 @@ void Board::handlePromotion(int row, int col) {
     }
 
     if (choice == 1) {
-        squares[row][col] = new Queen(promotionColor, Position(row, col)); // CHANGED: bool TO Color
+        squares[row][col] = new Queen(promotionColor, Position(row, col));  
     } else if (choice == 2) {
-        squares[row][col] = new Rook(promotionColor, Position(row, col));  // CHANGED: bool TO Color
+        squares[row][col] = new Rook(promotionColor, Position(row, col));  
     } else if (choice == 3) {
-        squares[row][col] = new Bishop(promotionColor, Position(row, col)); // CHANGED: bool TO Color
+        squares[row][col] = new Bishop(promotionColor, Position(row, col));  
     } else if (choice == 4) {
-        squares[row][col] = new Knight(promotionColor, Position(row, col)); // CHANGED: bool TO Color
+        squares[row][col] = new Knight(promotionColor, Position(row, col)); 
     } else {
         // Default to queen if invalid input
         cout << "Invalid choice. Defaulting to Queen." << endl;
-        squares[row][col] = new Queen(promotionColor, Position(row, col)); // CHANGED: bool TO Color
+        squares[row][col] = new Queen(promotionColor, Position(row, col)); 
     }
 
     cout << "Promoted to ";
@@ -507,8 +503,6 @@ void Board::handlePromotion(int row, int col) {
 // -------------------------------------------------------
 
 bool Board::parseInput(char input[], int &row, int &col) {
-    // Expected format: "e2" or "e 2"
-    // We'll handle both "e2e4" style as two separate calls
     // This function handles a single square like "e2"
 
     int len = strlen(input);
@@ -548,15 +542,11 @@ void Board::printWelcome() {
 }
 
 void Board::startGame() {
-    // External game controller (Usman) will call this
     // This is the main game loop
 
     printWelcome();
     initializeBoard();
 
-    // We need access to Usman's game condition functions
-    // They will be passed or the Game class will call them
-    // For now this loop handles input and display
 
     bool flipped   = false;
     bool gameOver  = false;
@@ -577,7 +567,6 @@ void Board::startGame() {
             cout << "Black's turn" << endl;
         }
 
-        // CHANGED: SPLIT INTO TWO SEPARATE PROMPTS FOR CLARITY
         cout << "Enter from (or command): ";
         cin >> from;
 
@@ -603,7 +592,6 @@ void Board::startGame() {
             continue;
         }
 
-        // ADDED: SHOW PIECE SYMBOL AND SQUARE IN THE TO PROMPT
         int tempRow, tempCol;
         tempRow = tempCol = -1;
         if (parseInput(from, tempRow, tempCol)) {

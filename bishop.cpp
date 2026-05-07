@@ -12,7 +12,6 @@ Bishop::Bishop() : Piece() {
     pieceType = BISHOP;
 }
 
-// ADDED: bool CONSTRUCTOR, CONVERTS bool TO Color ENUM FOR BASE CLASS
 Bishop::Bishop(bool isWhite) : Piece(isWhite ? WHITE : BLACK, Position(0,0)) {
     pieceType = BISHOP;
 }

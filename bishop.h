@@ -1,7 +1,6 @@
 #ifndef BISHOP_H
 #define BISHOP_H
 #include "piece.h"
-// REMOVED: #include "board.h" CAUSES CIRCULAR INCLUDE, Board IS FORWARD DECLARED IN piece.h
 
 /* Bishop class inherits from Piece
 This means Bishop automatically gets:
@@ -21,7 +20,7 @@ public:
     Example: temporary object creation*/
     Bishop();
 
-    // ADDED: bool CONSTRUCTOR NEEDED BY board.cpp initializeBoard AND handlePromotion
+    /*Parameterized Constructor*/
     Bishop(bool isWhite);
 
     /*Parameterized Constructor
@@ -43,7 +42,6 @@ public:
     */
     void getValidMoves(Board &board, Position moves[], int &moveCount) override;
 
-    //Symbol Function for board
     //Returns character used to display bishop
     char getSymbol() override;
 };
