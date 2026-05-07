@@ -20,7 +20,6 @@ class Queen : public Piece {
     
     /*Default Constructor
     Used when queen is created without initial values
-    Example: temporary object creation*/
     Queen();
     
     

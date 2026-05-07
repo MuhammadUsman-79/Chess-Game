@@ -15,10 +15,7 @@ public:
 
     /*Default Constructor
     Used when pawn is created without initial values
-    Example: temporary object creation*/
     Pawn();
-
-    // ADDED: bool CONSTRUCTOR NEEDED BY board.cpp initializeBoard
     Pawn(bool isWhite);
 
     /*Parameterized Constructor

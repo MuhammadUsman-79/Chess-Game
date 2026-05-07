@@ -1,6 +1,4 @@
 #include "piece.h"
-// REMOVED: Position constructors, ALREADY DEFINED INLINE IN piece.h
-// REMOVED: #include "board.h" NOT NEEDED HERE
 
 //======== PIECE CLASS IMPLEMENTATION ========
 

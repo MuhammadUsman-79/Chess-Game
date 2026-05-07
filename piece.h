@@ -1,4 +1,4 @@
-#ifndef PIECE_H  // CHANGED: BOARD_H TO PIECE_H
+#ifndef PIECE_H  
 #define PIECE_H
 #include <iostream>
 using namespace std;
@@ -47,22 +47,20 @@ protected:
 public:
 
     //Default Constructor
-    Piece(); // CHANGED: REMOVED EMPTY BODY, DEFINITION IS IN piece.cpp
+    Piece();
 
     //Parameterized Constructor
-    Piece(Color color, Position pos); // CHANGED: REMOVED EMPTY BODY, DEFINITION IS IN piece.cpp
+    Piece(Color color, Position pos);
 
     //Copy Constructor
-    Piece(const Piece &other); // CHANGED: REMOVED EMPTY BODY, DEFINITION IS IN piece.cpp
+    Piece(const Piece &other);
 
     //Virtual destructor
     virtual ~Piece() {}
 
-    //PURE VIRTUAL FUNCTIONS
     virtual void getValidMoves(Board &board, Position moves[], int &moveCount) = 0;
     virtual char getSymbol() = 0;
 
-    //GETTER FUNCTIONS
     Color getColor() {
         return pieceColor;
     }
@@ -83,7 +81,6 @@ public:
         return hasMoved;
     }
 
-    //SETTER FUNCTIONS
     void setPosition(Position pos) {
         currentPos = pos;
     }
@@ -92,20 +89,18 @@ public:
         hasMoved = moved;
     }
 
-    // ADDED: setMoved() NEEDED BY board.cpp WHEN UNDOING MOVES
     void setMoved(bool moved) {
         hasMoved = moved;
     }
 
     //Checks if moving from one square to another is inside the valid moves list
     bool isValidMove(int fromRow, int fromCol, int toRow, int toCol, Board* board) {
-    // ADDED: TEMPORARILY SET POSITION TO fromRow,fromCol BEFORE GENERATING MOVES
     Position savedPos = currentPos;
     currentPos = Position(fromRow, fromCol);
     Position moves[28];
     int moveCount = 0;
     getValidMoves(*board, moves, moveCount);
-    currentPos = savedPos; // ADDED: RESTORE ORIGINAL POSITION AFTER GENERATING MOVES
+    currentPos = savedPos; 
     for (int i = 0; i < moveCount; i++) {
         if (moves[i].row == toRow && moves[i].col == toCol) {
             return true;
@@ -114,7 +109,6 @@ public:
     return false;
     }
 
-    // ADDED: canAttack() NEEDED BY board.cpp isSquareUnderAttack
     bool canAttack(int fromRow, int fromCol, int toRow, int toCol, Board* board) {
         Position savedPos = currentPos;
         currentPos = Position(fromRow, fromCol);

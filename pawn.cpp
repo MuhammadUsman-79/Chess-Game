@@ -12,7 +12,6 @@ Pawn::Pawn() : Piece() {
     pieceType = PAWN;
 }
 
-// ADDED: bool CONSTRUCTOR, CONVERTS bool TO Color ENUM FOR BASE CLASS
 Pawn::Pawn(bool isWhite) : Piece(isWhite ? WHITE : BLACK, Position(0,0)) {
     pieceType = PAWN;
 }
@@ -72,8 +71,6 @@ void Pawn::getValidMoves(Board& board, Position moves[], int& moveCount) {
             }
         }
     }
-
-    // Optional: En passant can be added later
 }
 
 //getSymbol()
