@@ -9,6 +9,9 @@
 #include "GameConditions.h"
 #include <iostream>
 #include <cstring>
+#include <string>
+#include <sstream>
+
 using namespace std;
 
 Board::Board() {
@@ -20,6 +23,8 @@ Board::Board() {
     whiteQueenSideCastle = true;
     blackKingSideCastle  = true;
     blackQueenSideCastle = true;
+
+    positionHistoryCount = 0;
 
     for (int i = 0; i < BOARD_SIZE; i++) {
         for (int j = 0; j < BOARD_SIZE; j++) {
@@ -95,6 +100,10 @@ void Board::initializeBoard() {
     whiteQueenSideCastle = true;
     blackKingSideCastle  = true;
     blackQueenSideCastle = true;
+
+    //3 fold draw
+    positionHistoryCount = 0;
+    recordPosition();
 }
 
 // -------------------------------------------------------
@@ -449,6 +458,10 @@ bool Board::movePiece(int fromRow, int fromCol, int toRow, int toCol) {
         }
     }
 
+    if (positionHistoryCount  < 512) {
+        positionHistory[positionHistoryCount ++] = getBoardSignature();
+    }
+    
     return true;
 }
 
@@ -658,4 +671,67 @@ void Board::startGame() {
             }
         }
     }
+}
+
+
+// Threefold Repetition Logic
+
+static std::string intToStringSimple(int x) {
+    std::ostringstream out;
+    out << x;
+    return out.str();
+}
+
+std::string Board::getBoardSignature() {
+    std::string sig = "";
+
+    for (int r = 0; r < BOARD_SIZE; r++) {
+        for (int c = 0; c < BOARD_SIZE; c++) {
+            if (squares[r][c] == NULL) {
+                sig += '.';
+            } else {
+                sig += squares[r][c]->getSymbol();
+            }
+        }
+    }
+
+    sig += '|';
+    sig += (whiteTurn ? 'W' : 'B');
+
+    sig += '|';
+    sig += (whiteKingSideCastle ? '1' : '0');
+    sig += (whiteQueenSideCastle ? '1' : '0');
+    sig += (blackKingSideCastle ? '1' : '0');
+    sig += (blackQueenSideCastle ? '1' : '0');
+
+    sig += '|';
+    sig += intToStringSimple(enPassantRow);
+    sig += ',';
+    sig += intToStringSimple(enPassantCol);
+
+    return sig;
+}
+
+void Board::recordPosition() {
+    if (positionHistoryCount < 512) {
+        positionHistory[positionHistoryCount] = getBoardSignature();
+        positionHistoryCount++;
+    }
+}
+
+int Board::getPositionCount(const std::string& sig) {
+    int count = 0;
+
+    for (int i = 0; i < positionHistoryCount; i++) {
+        if (positionHistory[i] == sig) {
+            count++;
+        }
+    }
+
+    return count;
+}
+
+bool Board::isThreefoldRepetition() {
+    std::string sig = getBoardSignature();
+    return getPositionCount(sig) >= 3;
 }

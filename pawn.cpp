@@ -3,18 +3,7 @@
 
 // Default Constructor
 //Initializes pawn using base class default values
-Pawn::Pawn() : Piece() {
-    /*BASE CLASS already sets:
-    color = WHITE
-    position = (0,0)
-    hasMoved = false
-    */
-    pieceType = PAWN;
-}
 
-Pawn::Pawn(bool isWhite) : Piece(isWhite ? WHITE : BLACK, Position(0,0)) {
-    pieceType = PAWN;
-}
 
 /* Parameterized Constructor
 Used when placing pawn on board during initialization*/

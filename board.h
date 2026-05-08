@@ -1,6 +1,7 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include <string>
 #include "piece.h"
 
 // Board size constant
@@ -18,6 +19,10 @@ private:
     bool whiteQueenSideCastle;
     bool blackKingSideCastle;
     bool blackQueenSideCastle;
+
+    //for three fold repetion draw
+    std::string positionHistory[512];
+    int positionHistoryCount;
 
 public:
     Board();
@@ -55,6 +60,12 @@ public:
     // game loop
     void startGame();
     void printWelcome();
+
+    //for three fold repetion
+    std::string getBoardSignature();
+    void recordPosition();
+    int getPositionCount(const std::string& sig);
+    bool isThreefoldRepetition();
 
 private:
     void clearBoard();

@@ -17,6 +17,8 @@ public:
     bool is_draw(Color color);
 
     Color getOpponentColor(Color color);
+    
+    bool is_threefold_repetition();
 };
 
 #endif

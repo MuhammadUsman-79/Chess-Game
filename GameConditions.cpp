@@ -1,6 +1,8 @@
 #include <iostream>
 #include "GameConditions.h"
 #include "board.h"
+#include <cstdlib>
+
 using namespace std;
 
 GameConditions::GameConditions(Board* b) {
@@ -219,6 +221,11 @@ bool GameConditions::is_stalemate(Color color) {
 }
 
 bool GameConditions::is_draw(Color color) {
+
+    if (is_threefold_repetition()) {
+        return true;
+    }
+
     // Stalemate for current player or opponent = draw
     if (is_stalemate(color) || is_stalemate(getOpponentColor(color))) {
         return true;
@@ -271,4 +278,9 @@ bool GameConditions::is_draw(Color color) {
 // Helper function
 Color GameConditions::getOpponentColor(Color color) {
     return (color == WHITE) ? BLACK : WHITE;
+}
+
+bool GameConditions::is_threefold_repetition() {
+    std::string sig = board->getBoardSignature();
+    return board->getPositionCount(sig) >= 3;
 }

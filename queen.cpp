@@ -3,14 +3,6 @@
 
 // Default Constructor
 //Initializes queen using base class default values
-Queen::Queen() : Piece() {
-    /*BASE CLASS already sets:
-    color = WHITE
-    position = (0,0)
-    hasMoved = false
-    */
-    pieceType = QUEEN;
-}
 
 
 /*Parameterized Constructor

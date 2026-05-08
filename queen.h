@@ -21,7 +21,7 @@ class Queen : public Piece {
     /*Default Constructor
     Used when queen is created without initial values
     Queen();
-    
+    */
     
     //Parameterized Constructor
     //Used when placing queen on board at start of game

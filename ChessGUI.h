@@ -14,8 +14,8 @@ private:
     sf::Font font;
 
     // GUI Dimensions
-    const float TILE_SIZE = 80.f;
-    const float STATUS_BAR_HEIGHT = 60.f;
+    const float TILE_SIZE = 150.f;
+    const float STATUS_BAR_HEIGHT = 85.f;
 
     // Selection & Interaction State
     bool pieceSelected;
@@ -23,11 +23,40 @@ private:
     int selectedCol;
     std::string statusMessage;
 
+    // ADDED: TEMPORARY CHECK POPUP STATE
+    bool checkPopupActive;
+    std::string checkPopupMessage;
+    sf::Clock checkPopupClock;
+    float checkPopupDuration;
+
+    // ADDED: GAME OVER REASON TEXT
+    std::string gameOverReason;
+
     // Helper Draw Methods (Private)
     void drawBoard();
     void drawPieces();
     void drawStatusBar();
     void handleMouseClick();
+    void drawGameOverPopup();
+    void handleGameOverClick(int mouseX, int mouseY);
+    void clearLegalMoveHighlights();
+    void computeLegalMovesForSelectedPiece();
+    void drawLegalMoveHighlights();
+    void drawCheckHighlight();
+    void drawCheckPopup();
+    void triggerCheckPopup(const std::string& message);
+
+    //for game ending
+    bool gameOver;
+    std::string gameOverMessage;
+
+    //buttons
+    sf::FloatRect restartButtonBounds;
+    sf::FloatRect exitButtonBounds;
+
+    //valid moves highlightinig 
+    Position legalMoves[28];
+    int legalMoveCount;
 
 public:
     // Constructor
