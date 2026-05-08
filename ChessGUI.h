@@ -6,6 +6,11 @@
 #include "GameConditions.h"
 #include <string>
 
+    // GUI Dimensions
+    const float TILE_SIZE = 150.f;
+    const float ROW_LABEL_GUTTER = 45.f;
+    const float STATUS_BAR_HEIGHT = 85.f;
+
 class ChessGUI {
 private:
     sf::RenderWindow window;
@@ -32,6 +37,11 @@ private:
     // ADDED: GAME OVER REASON TEXT
     std::string gameOverReason;
 
+    bool invalidMovePopupActive;
+    std::string invalidMovePopupMessage;
+    sf::Clock invalidMovePopupClock;
+    float invalidMovePopupDuration;
+
     // Helper Draw Methods (Private)
     void drawBoard();
     void drawPieces();
@@ -45,6 +55,15 @@ private:
     void drawCheckHighlight();
     void drawCheckPopup();
     void triggerCheckPopup(const std::string& message);
+    //for pieces pics
+    bool loadPieceTextures();
+    sf::Texture* getTextureForPiece(Piece* p);
+
+    void drawInvalidMovePopup();
+    void triggerInvalidMovePopup(const std::string& message);
+    //labeling funcs
+    void drawColumnLabels();
+    void drawRowLabels();
 
     //for game ending
     bool gameOver;
@@ -57,6 +76,21 @@ private:
     //valid moves highlightinig 
     Position legalMoves[28];
     int legalMoveCount;
+
+    //pieces textures / PNGs
+    sf::Texture whiteKingTexture;
+    sf::Texture whiteQueenTexture;
+    sf::Texture whiteRookTexture;
+    sf::Texture whiteBishopTexture;
+    sf::Texture whiteKnightTexture;
+    sf::Texture whitePawnTexture;
+
+    sf::Texture blackKingTexture;
+    sf::Texture blackQueenTexture;
+    sf::Texture blackRookTexture;
+    sf::Texture blackBishopTexture;
+    sf::Texture blackKnightTexture;
+    sf::Texture blackPawnTexture;
 
 public:
     // Constructor

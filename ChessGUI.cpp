@@ -8,12 +8,22 @@ ChessGUI::ChessGUI(Board* b) : board(b), gc(b) {
     statusMessage = "White's turn. Select a piece to move.";
 
     // SFML 3.x uses {width, height} instead of (width, height)
-    window.create(sf::VideoMode({8 * (unsigned int)TILE_SIZE, 8 * (unsigned int)TILE_SIZE + (unsigned int)STATUS_BAR_HEIGHT}), "OOP Chess - SFML 3.x GUI");
+    window.create(
+    sf::VideoMode({
+        static_cast<unsigned int>(8 * TILE_SIZE + ROW_LABEL_GUTTER),
+        static_cast<unsigned int>(8 * TILE_SIZE + STATUS_BAR_HEIGHT)
+    }),
+    "OOP Chess - SFML 3.x GUI"
+);
     window.setFramerateLimit(60);
 
     // SFML 3.x: loadFromFile() is now openFromFile()
     if (!font.openFromFile("C:\\Windows\\Fonts\\arial.ttf")) {
         std::cout << "Error: Arial font could not be loaded from Windows directory!" << std::endl;
+    }
+    //loading chess pieces textures
+     if (!loadPieceTextures()) {
+        std::cout << "Error: one or more chess piece textures failed to load." << std::endl;
     }
 
     gameOver = false;
@@ -27,6 +37,10 @@ ChessGUI::ChessGUI(Board* b) : board(b), gc(b) {
     checkPopupMessage = "";
     checkPopupDuration = 2.0f;
     gameOverReason = "";
+
+    invalidMovePopupActive = false;
+    invalidMovePopupMessage = "";
+    invalidMovePopupDuration = 2.0f;
 }
 
 void ChessGUI::drawBoard() {
@@ -53,57 +67,44 @@ void ChessGUI::drawBoard() {
 }
 
 void ChessGUI::drawPieces() {
+    const float textureSize = 512.f;
+    const float padding = 12.f;
+    const float scale = (TILE_SIZE - 2.f * padding) / textureSize;
+
     for (int r = 0; r < BOARD_SIZE; r++) {
         for (int c = 0; c < BOARD_SIZE; c++) {
             Piece* p = board->getPiece(r, c);
-            if (p != nullptr) {
-                sf::CircleShape piecePlate(TILE_SIZE / 2.0f - 8.0f);
-                piecePlate.setPosition({c * TILE_SIZE + 8.0f, r * TILE_SIZE + 8.0f});
+            if (p == nullptr) continue;
 
-                if (p->isWhite()) {
-                    piecePlate.setFillColor(sf::Color(255, 253, 245));
-                    piecePlate.setOutlineColor(sf::Color(100, 100, 100));
-                } else {
-                    piecePlate.setFillColor(sf::Color(45, 45, 45));
-                    piecePlate.setOutlineColor(sf::Color(200, 200, 200));
-                }
-                piecePlate.setOutlineThickness(2.0f);
-                window.draw(piecePlate);
+            sf::Texture* texture = getTextureForPiece(p);
+            if (texture == nullptr) continue;
 
-                // SFML 3.x: sf::Text requires font in constructor
-                sf::Text text(font, p->getSymbol(), 34);
+            sf::Sprite sprite(*texture);
+            sprite.setScale({scale, scale});
+            sprite.setPosition({c * TILE_SIZE + padding, r * TILE_SIZE + padding});
 
-                if (p->isWhite()) {
-                    text.setFillColor(sf::Color(0, 0, 0));
-                } else {
-                    text.setFillColor(sf::Color(255, 255, 255));
-                }
-
-                // SFML 3.x: FloatRect uses .position and .size instead of .left/.top/.width/.height
-                sf::FloatRect textBounds = text.getLocalBounds();
-                sf::Vector2f origin = {
-                    textBounds.position.x + textBounds.size.x / 2.0f,
-                    textBounds.position.y + textBounds.size.y / 2.0f
-                };
-                text.setOrigin(origin);
-                text.setPosition({c * TILE_SIZE + TILE_SIZE / 2.0f, r * TILE_SIZE + TILE_SIZE / 2.0f});
-
-                window.draw(text);
-            }
+            window.draw(sprite);
         }
     }
 }
 
 void ChessGUI::drawStatusBar() {
-    sf::RectangleShape bar({8 * TILE_SIZE, STATUS_BAR_HEIGHT});
+    // ADDED: STATUS BAR NOW COVERS THE FULL WINDOW WIDTH
+    sf::RectangleShape bar({
+        static_cast<float>(window.getSize().x),
+        STATUS_BAR_HEIGHT
+    });
     bar.setPosition({0, 8 * TILE_SIZE});
     bar.setFillColor(sf::Color(35, 35, 35));
     window.draw(bar);
 
-    // SFML 3.x: sf::Text requires font in constructor
+    // ADDED: DRAW COLUMN LABELS
+    drawColumnLabels();
+
+    // MOVE STATUS TEXT LOWER SO IT DOES NOT OVERLAP LABELS
     sf::Text text(font, statusMessage, 18);
-    text.setFillColor(sf::Color(255, 255, 255));
-    text.setPosition({20.f, 8 * TILE_SIZE + 18.f});
+    text.setFillColor(sf::Color::White);
+    text.setPosition({20.f, 8 * TILE_SIZE + 42.f});
     window.draw(text);
 }
 
@@ -115,10 +116,11 @@ void ChessGUI::triggerCheckPopup(const std::string& message) {
 }
 
 // ADDED: DRAW TEMPORARY CHECK POPUP
+// ADDED: DRAW PRETTIER TEMPORARY CHECK POPUP
 void ChessGUI::drawCheckPopup() {
     if (!checkPopupActive) return;
 
-    // ADDED: AUTO-HIDE POPUP AFTER A FEW SECONDS
+    // AUTO-HIDE AFTER TIME EXPIRES
     if (checkPopupClock.getElapsedTime().asSeconds() > checkPopupDuration) {
         checkPopupActive = false;
         return;
@@ -126,21 +128,108 @@ void ChessGUI::drawCheckPopup() {
 
     sf::Vector2u winSize = window.getSize();
 
-    float popupW = 420.f;
+    float popupW = 520.f;
     float popupH = 90.f;
     float x = (winSize.x - popupW) / 2.f;
-    float y = 60.f;
+    float y = 35.f;
 
+    // SHADOW
+    sf::RectangleShape shadow({popupW, popupH});
+    shadow.setPosition({x + 6.f, y + 6.f});
+    shadow.setFillColor(sf::Color(0, 0, 0, 80));
+    window.draw(shadow);
+
+    // MAIN POPUP PANEL
     sf::RectangleShape popup({popupW, popupH});
     popup.setPosition({x, y});
-    popup.setFillColor(sf::Color(255, 235, 235, 235));
-    popup.setOutlineColor(sf::Color(180, 0, 0));
+    popup.setFillColor(sf::Color(255, 245, 245));
+    popup.setOutlineColor(sf::Color(180, 30, 30));
     popup.setOutlineThickness(3.f);
     window.draw(popup);
 
-    sf::Text text(font, checkPopupMessage, 22);
-    text.setFillColor(sf::Color(140, 0, 0));
-    text.setPosition({x + 20.f, y + 28.f});
+    // LEFT ACCENT BAR
+    sf::RectangleShape accent({10.f, popupH});
+    accent.setPosition({x, y});
+    accent.setFillColor(sf::Color(190, 30, 30));
+    window.draw(accent);
+
+    // WARNING ICON CIRCLE
+    sf::CircleShape icon(18.f);
+    icon.setPosition({x + 22.f, y + 27.f});
+    icon.setFillColor(sf::Color(190, 30, 30));
+    window.draw(icon);
+
+    sf::Text iconText(font, "!", 24);
+    iconText.setFillColor(sf::Color::White);
+    iconText.setPosition({x + 31.f, y + 19.f});
+    window.draw(iconText);
+
+    // MESSAGE TEXT
+    sf::Text text(font, checkPopupMessage, 24);
+    text.setFillColor(sf::Color(120, 0, 0));
+    text.setPosition({x + 65.f, y + 28.f});
+    window.draw(text);
+}
+
+// ADDED: START A TEMPORARY INVALID MOVE POPUP
+void ChessGUI::triggerInvalidMovePopup(const std::string& message) {
+    invalidMovePopupActive = true;
+    invalidMovePopupMessage = message;
+    invalidMovePopupClock.restart();
+}
+
+// ADDED: DRAW TEMPORARY INVALID MOVE POPUP
+void ChessGUI::drawInvalidMovePopup() {
+    if (!invalidMovePopupActive) return;
+
+    // AUTO-HIDE AFTER TIME EXPIRES
+    if (invalidMovePopupClock.getElapsedTime().asSeconds() > invalidMovePopupDuration) {
+        invalidMovePopupActive = false;
+        return;
+    }
+
+    sf::Vector2u winSize = window.getSize();
+
+    float popupW = 520.f;
+    float popupH = 90.f;
+    float x = (winSize.x - popupW) / 2.f;
+    float y = 140.f;
+
+    // SHADOW
+    sf::RectangleShape shadow({popupW, popupH});
+    shadow.setPosition({x + 6.f, y + 6.f});
+    shadow.setFillColor(sf::Color(0, 0, 0, 80));
+    window.draw(shadow);
+
+    // MAIN POPUP PANEL
+    sf::RectangleShape popup({popupW, popupH});
+    popup.setPosition({x, y});
+    popup.setFillColor(sf::Color(255, 250, 235));
+    popup.setOutlineColor(sf::Color(200, 120, 0));
+    popup.setOutlineThickness(3.f);
+    window.draw(popup);
+
+    // LEFT ACCENT BAR
+    sf::RectangleShape accent({10.f, popupH});
+    accent.setPosition({x, y});
+    accent.setFillColor(sf::Color(200, 120, 0));
+    window.draw(accent);
+
+    // WARNING ICON CIRCLE
+    sf::CircleShape icon(18.f);
+    icon.setPosition({x + 22.f, y + 27.f});
+    icon.setFillColor(sf::Color(200, 120, 0));
+    window.draw(icon);
+
+    sf::Text iconText(font, "!", 24);
+    iconText.setFillColor(sf::Color::White);
+    iconText.setPosition({x + 31.f, y + 19.f});
+    window.draw(iconText);
+
+    // MESSAGE TEXT
+    sf::Text text(font, invalidMovePopupMessage, 24);
+    text.setFillColor(sf::Color(120, 70, 0));
+    text.setPosition({x + 65.f, y + 28.f});
     window.draw(text);
 }
 
@@ -291,72 +380,104 @@ void ChessGUI::drawCheckHighlight() {
     }
 }
 
+// ADDED: DRAW PRETTIER GAME OVER POPUP
 void ChessGUI::drawGameOverPopup() {
     if (!gameOver) return;
 
     sf::Vector2u winSize = window.getSize();
 
-    // ADDED: DARK TRANSPARENT OVERLAY
+    // DARK TRANSPARENT OVERLAY
     sf::RectangleShape overlay({(float)winSize.x, (float)winSize.y});
     overlay.setPosition({0.f, 0.f});
-    overlay.setFillColor(sf::Color(0, 0, 0, 180));
+    overlay.setFillColor(sf::Color(0, 0, 0, 170));
     window.draw(overlay);
 
-    // ADDED: POPUP BOX
-    float popupW = 500.f;
-    float popupH = 260.f;
+    // POPUP SIZE AND CENTER POSITION
+    float popupW = 600.f;
+    float popupH = 320.f;
     float x = (winSize.x - popupW) / 2.f;
     float y = (winSize.y - popupH) / 2.f;
 
+    // SHADOW
+    sf::RectangleShape shadow({popupW, popupH});
+    shadow.setPosition({x + 8.f, y + 8.f});
+    shadow.setFillColor(sf::Color(0, 0, 0, 90));
+    window.draw(shadow);
+
+    // MAIN PANEL
     sf::RectangleShape popup({popupW, popupH});
     popup.setPosition({x, y});
-    popup.setFillColor(sf::Color(245, 245, 245));
-    popup.setOutlineColor(sf::Color(50, 50, 50));
+    popup.setFillColor(sf::Color(248, 248, 248));
+    popup.setOutlineColor(sf::Color(40, 40, 40));
     popup.setOutlineThickness(3.f);
     window.draw(popup);
 
-    // ADDED: TITLE
-    sf::Text title(font, "GAME OVER", 32);
-    title.setFillColor(sf::Color::Black);
-    title.setPosition({x + 145.f, y + 18.f});
+    // TOP TITLE BAR
+    sf::RectangleShape topBar({popupW, 55.f});
+    topBar.setPosition({x, y});
+    topBar.setFillColor(sf::Color(35, 35, 55));
+    window.draw(topBar);
+
+    // TITLE
+    sf::Text title(font, "GAME OVER", 34);
+    title.setFillColor(sf::Color::White);
+    title.setPosition({x + 200.f, y + 10.f});
     window.draw(title);
 
-    // ADDED: MAIN RESULT MESSAGE
-    sf::Text message(font, gameOverMessage, 22);
-    message.setFillColor(sf::Color::Black);
-    message.setPosition({x + 40.f, y + 75.f});
+    // MAIN RESULT TEXT
+    sf::Text message(font, gameOverMessage, 26);
+    message.setFillColor(sf::Color(20, 20, 20));
+    message.setPosition({x + 40.f, y + 85.f});
     window.draw(message);
 
-    // ADDED: HOW THE GAME ENDED
-    sf::Text reason(font, gameOverReason, 18);
-    reason.setFillColor(sf::Color(70, 70, 70));
-    reason.setPosition({x + 40.f, y + 115.f});
+    // REASON TEXT
+    sf::Text reason(font, gameOverReason, 20);
+    reason.setFillColor(sf::Color(90, 90, 90));
+    reason.setPosition({x + 40.f, y + 130.f});
     window.draw(reason);
 
+    // SMALL INSTRUCTION LINE
+    sf::Text hint(font, "Choose what to do next:", 18);
+    hint.setFillColor(sf::Color(100, 100, 100));
+    hint.setPosition({x + 40.f, y + 170.f});
+    window.draw(hint);
+
+    // RESTART BUTTON SHADOW
+    sf::RectangleShape restartShadow({160.f, 50.f});
+    restartShadow.setPosition({x + 72.f, y + 225.f});
+    restartShadow.setFillColor(sf::Color(0, 0, 0, 70));
+    window.draw(restartShadow);
+
     // RESTART BUTTON
-    sf::RectangleShape restartButton({140.f, 45.f});
-    restartButton.setPosition({x + 70.f, y + 170.f});
+    sf::RectangleShape restartButton({160.f, 50.f});
+    restartButton.setPosition({x + 68.f, y + 221.f});
     restartButton.setFillColor(sf::Color(70, 160, 70));
     restartButton.setOutlineColor(sf::Color::Black);
     restartButton.setOutlineThickness(2.f);
     window.draw(restartButton);
 
-    sf::Text restartText(font, "Restart", 20);
+    sf::Text restartText(font, "Restart", 22);
     restartText.setFillColor(sf::Color::White);
-    restartText.setPosition({x + 105.f, y + 180.f});
+    restartText.setPosition({x + 110.f, y + 232.f});
     window.draw(restartText);
 
+    // EXIT BUTTON SHADOW
+    sf::RectangleShape exitShadow({160.f, 50.f});
+    exitShadow.setPosition({x + 372.f, y + 225.f});
+    exitShadow.setFillColor(sf::Color(0, 0, 0, 70));
+    window.draw(exitShadow);
+
     // EXIT BUTTON
-    sf::RectangleShape exitButton({140.f, 45.f});
-    exitButton.setPosition({x + 290.f, y + 170.f});
+    sf::RectangleShape exitButton({160.f, 50.f});
+    exitButton.setPosition({x + 368.f, y + 221.f});
     exitButton.setFillColor(sf::Color(180, 60, 60));
     exitButton.setOutlineColor(sf::Color::Black);
     exitButton.setOutlineThickness(2.f);
     window.draw(exitButton);
 
-    sf::Text exitText(font, "Exit", 20);
+    sf::Text exitText(font, "Exit", 22);
     exitText.setFillColor(sf::Color::White);
-    exitText.setPosition({x + 343.f, y + 180.f});
+    exitText.setPosition({x + 429.f, y + 232.f});
     window.draw(exitText);
 
     // SAVE BUTTON BOUNDS FOR CLICK DETECTION
@@ -441,6 +562,7 @@ void ChessGUI::handleMouseClick() {
             } 
             else {
                 statusMessage = "Invalid move! Try again.";
+                triggerInvalidMovePopup("Invalid move! Try again.");
             }
             pieceSelected = false;
             selectedRow = -1;
@@ -465,12 +587,14 @@ void ChessGUI::run() {
         window.clear(sf::Color(30, 30, 30));
 
         drawBoard();
-        drawCheckHighlight();        // ADDED: SHOW KING IN CHECK
-        drawLegalMoveHighlights();   // ADDED: SHOW LEGAL MOVES
+        drawRowLabels();             // ADDED: SHOW ROW NUMBERS 1-8
+        drawCheckHighlight();
+        drawLegalMoveHighlights();
         drawPieces();
         drawStatusBar();
-        drawCheckPopup();            // ADDED: TEMPORARY CHECK POPUP
-        drawGameOverPopup();         // ADDED: GAME OVER POPUP
+        drawCheckPopup();
+        drawInvalidMovePopup();
+        drawGameOverPopup();
 
         window.display();
     }
@@ -495,9 +619,109 @@ void ChessGUI::handleGameOverClick(int mouseX, int mouseY) {
         checkPopupActive = false;
         checkPopupMessage = "";
 
+        // ADDED: CLEAR INVALID MOVE POPUP ON RESTART
+        invalidMovePopupActive = false;
+        invalidMovePopupMessage = "";
+
         statusMessage = "White's turn. Select a piece to move.";
     }
     else if (exitButtonBounds.contains(point)) {
         window.close();
+    }
+}
+
+//drawing pieces funcions 
+// ADDED: LOAD ALL PIECE TEXTURES FROM ASSETS/Pieces
+bool ChessGUI::loadPieceTextures() {
+    std::string base = "assets/pieces/";
+
+    bool ok = true;
+
+    ok = ok && whiteKingTexture.loadFromFile(base + "w_king_png_512px.png");
+    ok = ok && whiteQueenTexture.loadFromFile(base + "w_queen_png_512px.png");
+    ok = ok && whiteRookTexture.loadFromFile(base + "w_rook_png_512px.png");
+    ok = ok && whiteBishopTexture.loadFromFile(base + "w_bishop_png_512px.png");
+    ok = ok && whiteKnightTexture.loadFromFile(base + "w_knight_png_512px.png");
+    ok = ok && whitePawnTexture.loadFromFile(base + "w_pawn_png_512px.png");
+
+    ok = ok && blackKingTexture.loadFromFile(base + "b_king_png_512px.png");
+    ok = ok && blackQueenTexture.loadFromFile(base + "b_queen_png_512px.png");
+    ok = ok && blackRookTexture.loadFromFile(base + "b_rook_png_512px.png");
+    ok = ok && blackBishopTexture.loadFromFile(base + "b_bishop_png_512px.png");
+    ok = ok && blackKnightTexture.loadFromFile(base + "b_knight_png_512px.png");
+    ok = ok && blackPawnTexture.loadFromFile(base + "b_pawn_png_512px.png");
+
+    return ok;
+}
+
+// ADDED: GET THE CORRECT TEXTURE FOR EACH PIECE
+sf::Texture* ChessGUI::getTextureForPiece(Piece* p) {
+    if (p == nullptr) return nullptr;
+
+    bool white = p->isWhite();
+
+    switch (p->getType()) {
+        case KING:   return white ? &whiteKingTexture   : &blackKingTexture;
+        case QUEEN:  return white ? &whiteQueenTexture  : &blackQueenTexture;
+        case ROOK:   return white ? &whiteRookTexture    : &blackRookTexture;
+        case BISHOP: return white ? &whiteBishopTexture  : &blackBishopTexture;
+        case KNIGHT: return white ? &whiteKnightTexture  : &blackKnightTexture;
+        case PAWN:   return white ? &whitePawnTexture    : &blackPawnTexture;
+        default:     return nullptr;
+    }
+}
+
+// ADDED: DRAW COLUMN LABELS a-h ON THE GUI BOARD
+void ChessGUI::drawColumnLabels() {
+    for (int c = 0; c < BOARD_SIZE; c++) {
+        std::string file(1, static_cast<char>('a' + c));
+
+        sf::Text label(font, file, 18);
+        label.setFillColor(sf::Color(230, 230, 230));
+
+        // CENTER THE LABEL OVER EACH COLUMN
+        sf::FloatRect bounds = label.getLocalBounds();
+        label.setOrigin({
+            bounds.position.x + bounds.size.x / 2.f,
+            bounds.position.y + bounds.size.y / 2.f
+        });
+
+        // PLACE LABELS JUST UNDER THE BOARD INSIDE THE STATUS BAR
+        label.setPosition({
+            c * TILE_SIZE + TILE_SIZE / 2.f,
+            8.f * TILE_SIZE + 10.f
+        });
+
+        window.draw(label);
+    }
+}
+
+// ADDED: DRAW ROW LABELS 1-8 ON THE RIGHT SIDE OF THE BOARD
+void ChessGUI::drawRowLabels() {
+    // ADDED: SIDE GUTTER BACKGROUND
+    sf::RectangleShape gutter({ROW_LABEL_GUTTER, 8.f * TILE_SIZE});
+    gutter.setPosition({8.f * TILE_SIZE, 0.f});
+    gutter.setFillColor(sf::Color(45, 45, 45));
+    window.draw(gutter);
+
+    for (int r = 0; r < BOARD_SIZE; r++) {
+        std::string labelStr = std::to_string(8 - r);
+
+        sf::Text label(font, labelStr, 22);
+        label.setFillColor(sf::Color(230, 230, 230));
+
+        // CENTER THE LABEL IN THE GUTTER
+        sf::FloatRect bounds = label.getLocalBounds();
+        label.setOrigin({
+            bounds.position.x + bounds.size.x / 2.f,
+            bounds.position.y + bounds.size.y / 2.f
+        });
+
+        label.setPosition({
+            8.f * TILE_SIZE + ROW_LABEL_GUTTER / 2.f,
+            r * TILE_SIZE + TILE_SIZE / 2.f
+        });
+
+        window.draw(label);
     }
 }
