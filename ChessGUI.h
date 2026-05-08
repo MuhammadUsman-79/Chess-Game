@@ -6,11 +6,6 @@
 #include "GameConditions.h"
 #include <string>
 
-    // GUI Dimensions
-    const float TILE_SIZE = 150.f;
-    const float ROW_LABEL_GUTTER = 45.f;
-    const float STATUS_BAR_HEIGHT = 85.f;
-
 class ChessGUI {
 private:
     sf::RenderWindow window;
@@ -21,6 +16,7 @@ private:
     // GUI Dimensions
     const float TILE_SIZE = 150.f;
     const float STATUS_BAR_HEIGHT = 85.f;
+    const float ROW_LABEL_GUTTER = 45.f;
 
     // Selection & Interaction State
     bool pieceSelected;
@@ -40,8 +36,9 @@ private:
     bool invalidMovePopupActive;
     std::string invalidMovePopupMessage;
     sf::Clock invalidMovePopupClock;
-    float invalidMovePopupDuration;
+    float invalidMovePopupDuration; 
 
+    
     // Helper Draw Methods (Private)
     void drawBoard();
     void drawPieces();

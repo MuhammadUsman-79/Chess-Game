@@ -7,27 +7,9 @@ ChessGUI::ChessGUI(Board* b) : board(b), gc(b) {
     selectedCol = -1;
     statusMessage = "White's turn. Select a piece to move.";
 
-    // SFML 3.x uses {width, height} instead of (width, height)
-    window.create(
-    sf::VideoMode({
-        static_cast<unsigned int>(8 * TILE_SIZE + ROW_LABEL_GUTTER),
-        static_cast<unsigned int>(8 * TILE_SIZE + STATUS_BAR_HEIGHT)
-    }),
-    "OOP Chess - SFML 3.x GUI"
-);
-    window.setFramerateLimit(60);
-
-    // SFML 3.x: loadFromFile() is now openFromFile()
-    if (!font.openFromFile("C:\\Windows\\Fonts\\arial.ttf")) {
-        std::cout << "Error: Arial font could not be loaded from Windows directory!" << std::endl;
-    }
-    //loading chess pieces textures
-     if (!loadPieceTextures()) {
-        std::cout << "Error: one or more chess piece textures failed to load." << std::endl;
-    }
-
     gameOver = false;
     gameOverMessage = "";
+    gameOverReason = "";
     restartButtonBounds = sf::FloatRect({0.f, 0.f}, {0.f, 0.f});
     exitButtonBounds = sf::FloatRect({0.f, 0.f}, {0.f, 0.f});
 
@@ -36,13 +18,25 @@ ChessGUI::ChessGUI(Board* b) : board(b), gc(b) {
     checkPopupActive = false;
     checkPopupMessage = "";
     checkPopupDuration = 2.0f;
-    gameOverReason = "";
 
     invalidMovePopupActive = false;
     invalidMovePopupMessage = "";
     invalidMovePopupDuration = 2.0f;
-}
 
+    // ADDED: WINDOW SIZE WITH ROW LABEL GUTTER
+    // SFML 3.x: Use initializer list for VideoMode
+    unsigned int windowWidth = static_cast<unsigned int>(8 * TILE_SIZE + ROW_LABEL_GUTTER);
+    unsigned int windowHeight = static_cast<unsigned int>(8 * TILE_SIZE + STATUS_BAR_HEIGHT);
+    
+    window.create(sf::VideoMode({windowWidth, windowHeight}), "OOP Chess - SFML 3.x GUI");
+    if (!font.openFromFile("C:\\Windows\\Fonts\\arial.ttf")) {
+        std::cout << "Error: Arial font could not be loaded!" << std::endl;
+    }
+
+    if (!loadPieceTextures()) {
+        std::cout << "Error: chess piece textures failed to load." << std::endl;
+    }
+}
 void ChessGUI::drawBoard() {
     for (int r = 0; r < BOARD_SIZE; r++) {
         for (int c = 0; c < BOARD_SIZE; c++) {
