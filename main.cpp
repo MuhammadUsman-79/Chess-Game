@@ -1,15 +1,22 @@
 #include "AllHeaderFiles.h"
+#include "ChessGUI.h"
+
 #include<iostream>
 
-#include "AllHeaderFiles.h"
-#include <iostream>
-
-using namespace std;
-
-int main(){
-
+int main() {
     Board board;
-    board.startGame();
+    board.initializeBoard(); // Put pieces on their starting squares
+
+    ChessGUI gui(&board);    // Link the graphic visualizer to the board
+    gui.run();              // Start SFML Window loop
 
     return 0;
 }
+
+// int main(){
+
+//     Board board;
+//     board.startGame();
+
+//     return 0;
+// }
