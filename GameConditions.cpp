@@ -81,11 +81,11 @@ bool GameConditions::is_checkmate(Color color) {
                     capturedEnPassant = board->getPiece(tr - direction, tc);
                 }
 
-                // === PERFORM THE MOVE ===
+                // PERFORMS THE MOVE
                 board->setPiece(tr, tc, p);
                 board->removePiece(r, c);
 
-                // APPLY SPECIAL MOVES IF NEEDED
+                //SPECIAL MOVES
                 if (isCastling) {
                     Piece* rook = board->getPiece(r, rookFromCol);
                     board->setPiece(r, rookToCol, rook);
@@ -101,11 +101,11 @@ bool GameConditions::is_checkmate(Color color) {
 
                 bool still_in_check = is_in_check(color);
 
-                // === UNDO THE MOVE ===
+                //UNDO THE MOVE
                 board->setPiece(r, c, p);
                 board->setPiece(tr, tc, temp);
 
-                // UNDO SPECIAL MOVES
+                //UNDO SPECIAL MOVES
                 if (isCastling) {
                     Piece* rook = board->getPiece(r, rookToCol);
                     board->setPiece(r, rookFromCol, rook);
@@ -120,7 +120,7 @@ bool GameConditions::is_checkmate(Color color) {
                 p->setPosition(Position(r, c)); 
                 if (!still_in_check) {
                     return false;
-                    // at least one legal move exists, not checkmate
+                    // at least one legal move exists so no checkmate
                 }
             }
             }
@@ -175,11 +175,11 @@ bool GameConditions::is_stalemate(Color color) {
                     capturedEnPassant = board->getPiece(tr - direction, tc);
                 }
 
-                // === PERFORM THE MOVE ===
+                // PERFORM THE MOVE
                 board->setPiece(tr, tc, p);
                 board->removePiece(r, c);
 
-                // APPLY SPECIAL MOVES IF NEEDED
+                // APPLY SPECIAL MOVES
                 if (isCastling) {
                     Piece* rook = board->getPiece(r, rookFromCol);
                     board->setPiece(r, rookToCol, rook);
@@ -191,10 +191,10 @@ bool GameConditions::is_stalemate(Color color) {
                     board->removePiece(tr - direction, tc);
                 }
 
-                p->setPosition(Position(tr, tc)); // ADDED: UPDATE PIECE POSITION DURING SIMULATION
+                p->setPosition(Position(tr, tc));
                 bool still_in_check = is_in_check(color);
 
-                // === UNDO THE MOVE ===
+                // UNDO THE MOVE
                 board->setPiece(r, c, p);
                 board->setPiece(tr, tc, temp);
 
@@ -231,7 +231,7 @@ bool GameConditions::is_draw(Color color) {
         return true;
     }
 
-    // === INSUFFICIENT MATERIAL CHECK ===
+    // INSUFFICIENT MATERIAL CHECK
     int whiteCount = 0;
     int blackCount = 0;
     bool whiteHasMajor = false;   // Queen, Rook, or Pawn
@@ -267,7 +267,7 @@ bool GameConditions::is_draw(Color color) {
     if (whiteCount == 1 && blackCount == 0 && !whiteHasMajor) return true;
     if (blackCount == 1 && whiteCount == 0 && !blackHasMajor) return true;
 
-    // King + Bishop vs King + Bishop (very common draw)
+    // King + Bishop vs King + Bishop
     if (whiteCount == 1 && blackCount == 1 && !whiteHasMajor && !blackHasMajor) {
         return true;
     }
@@ -275,7 +275,7 @@ bool GameConditions::is_draw(Color color) {
     return false;
 }
 
-// Helper function
+// Helper functions
 Color GameConditions::getOpponentColor(Color color) {
     return (color == WHITE) ? BLACK : WHITE;
 }

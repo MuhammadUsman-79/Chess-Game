@@ -1,6 +1,6 @@
 #include "piece.h"
 
-//======== PIECE CLASS IMPLEMENTATION ========
+// PIECE CLASS IMPLEMENTATION
 
 //Default Constructor, used when no values provided
 Piece::Piece() {

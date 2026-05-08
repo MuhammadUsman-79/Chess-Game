@@ -30,7 +30,7 @@ void Pawn::getValidMoves(Board& board, Position moves[], int& moveCount) {
     
     int direction = (getColor() == WHITE) ? -1 : 1;  // White moves up (-1), Black moves down (+1)
 
-    // === ONE STEP FORWARD ===
+    // ONE STEP FORWARD
     int oneStep = row + direction;
     if (oneStep >= 0 && oneStep < BOARD_SIZE) {
         if (board.getPiece(oneStep, col) == nullptr) {   // Square must be EMPTY
@@ -38,7 +38,7 @@ void Pawn::getValidMoves(Board& board, Position moves[], int& moveCount) {
         }
     }
 
-    // === TWO STEPS FORWARD (only from starting position) ===
+    // TWO STEPS FORWARD (only from starting position)
     if ((getColor() == WHITE && row == 6) || (getColor() == BLACK && row == 1)) {
         int twoStep = row + (2 * direction);
         if (twoStep >= 0 && twoStep < BOARD_SIZE) {
@@ -49,7 +49,7 @@ void Pawn::getValidMoves(Board& board, Position moves[], int& moveCount) {
         }
     }
 
-    // === DIAGONAL CAPTURES ===
+    // DIAGONAL CAPTURES
     int captureCols[2] = {col - 1, col + 1};
     for (int i = 0; i < 2; i++) {
         int c = captureCols[i];

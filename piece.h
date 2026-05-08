@@ -29,14 +29,14 @@ struct Position {
     
     //Copy Constructor (Shallow copy)
     Position(const Position &other) {
-        row = other.row; // ADDED: ACTUALLY COPY THE VALUES
-        col = other.col; // ADDED: ACTUALLY COPY THE VALUES
+        row = other.row;
+        col = other.col;
     }
 };
 
 class Board;
 
-//=============== ABSTRACT BASE CLASS ===============
+// ABSTRACT BASE CLASS
 class Piece {
 protected:
     Color pieceColor;
