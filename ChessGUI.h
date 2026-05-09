@@ -14,7 +14,7 @@ private:
     sf::Font font;
 
     // GUI Dimensions
-    const float TILE_SIZE = 150.f;
+    const float TILE_SIZE = 170.f;
     const float STATUS_BAR_HEIGHT = 85.f;
     const float ROW_LABEL_GUTTER = 45.f;
 

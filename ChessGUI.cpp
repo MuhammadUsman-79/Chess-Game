@@ -83,23 +83,31 @@ void ChessGUI::drawPieces() {
 }
 
 void ChessGUI::drawStatusBar() {
-    // ADDED: STATUS BAR NOW COVERS THE FULL WINDOW WIDTH
+    // FULL WIDTH STATUS BAR
     sf::RectangleShape bar({
         static_cast<float>(window.getSize().x),
         STATUS_BAR_HEIGHT
     });
     bar.setPosition({0, 8 * TILE_SIZE});
-    bar.setFillColor(sf::Color(35, 35, 35));
+    bar.setFillColor(sf::Color(30, 30, 35));
     window.draw(bar);
 
-    // ADDED: DRAW COLUMN LABELS
+    // COLUMN LABELS (a-h)
     drawColumnLabels();
 
-    // MOVE STATUS TEXT LOWER SO IT DOES NOT OVERLAP LABELS
-    sf::Text text(font, statusMessage, 18);
-    text.setFillColor(sf::Color::White);
-    text.setPosition({20.f, 8 * TILE_SIZE + 42.f});
-    window.draw(text);
+    // BIGGER, BOLDER TURN STATUS TEXT (ONLY TURN INFO)
+    sf::Text turnText(font, statusMessage, 28);  // BIGGER FONT
+    turnText.setFillColor(sf::Color(255, 255, 255));
+
+    // SHADOW FOR BOLD LOOK
+    sf::Text shadow(font, statusMessage, 28);
+    shadow.setFillColor(sf::Color(0, 0, 0, 150));
+    shadow.setPosition({25.f, 8 * TILE_SIZE + 52.f});
+    window.draw(shadow);
+
+    // MAIN TEXT
+    turnText.setPosition({22.f, 8 * TILE_SIZE + 48.f});
+    window.draw(turnText);
 }
 
 // ADDED: START A TEMPORARY CHECK POPUP
@@ -547,15 +555,15 @@ void ChessGUI::handleMouseClick() {
                     checkPopupActive = false;
                     statusMessage = gameOverMessage;
                 } else if (gc.is_in_check(activeColor)) {
-                    statusMessage = activeColorStr + " is in CHECK!";
-                    triggerCheckPopup(activeColorStr + " is in CHECK!");
+                    // STATUS BAR SHOWS ONLY TURN INFO — POPUP HANDLES CHECK
+                    triggerCheckPopup(activeColorStr + " king is in CHECK!");
                 } else {
                     statusMessage = activeColorStr + "'s turn.";
                 }
 
             } 
             else {
-                statusMessage = "Invalid move! Try again.";
+                // STATUS BAR SHOWS ONLY TURN INFO — POPUP HANDLES INVALID
                 triggerInvalidMovePopup("Invalid move! Try again.");
             }
             pieceSelected = false;
@@ -564,6 +572,13 @@ void ChessGUI::handleMouseClick() {
             
             clearLegalMoveHighlights();
         }
+    }
+
+    // ADDED: ALWAYS SHOW TURN INFO IN STATUS BAR
+    if (!gameOver) {
+        Color activeColor = board->isWhiteTurn() ? WHITE : BLACK;
+        std::string activeColorStr = (activeColor == WHITE) ? "White" : "Black";
+        statusMessage = activeColorStr + "'s turn.";
     }
 }
 
